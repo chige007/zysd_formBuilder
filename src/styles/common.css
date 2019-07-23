@@ -1,0 +1,39 @@
+.formGroup {
+  margin-bottom: 10px;
+}
+.accordion .accordion-header-selected {
+  background: #f3f3f3;
+}
+.input-group {
+  margin-bottom: 8px;
+}
+.input-group .input-group-addon {
+  border: none;
+  background: transparent;
+  font-size: 12px;
+  padding: 5px 10px 5px 5px;
+  min-width: 39px;
+  box-sizing: border-box;
+  color: #369;
+}
+.input-group .form-control {
+  border-radius: 0px;
+  height: 26px;
+  padding: 0px 6px;
+  box-sizing: border-box;
+  border-radius: 4px;
+  font-size: 13px;
+  color: #333;
+}
+.panel-group .panel {
+  margin-bottom: 5px;
+}
+.panel-group .panel .panel-title {
+  padding: 5px 5px;
+  border: 1px solid #ddd;
+  background-color: #f7f7f7;
+  cursor: pointer;
+}
+.panel-group .panel .panel-body {
+  padding: 5px;
+}
