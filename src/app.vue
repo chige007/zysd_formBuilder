@@ -1,29 +1,44 @@
 <template>
 <div class="page_formBuilder w-100 h-100 relative">
 	<div ref="layout" class="easyui-layout" fit="true">
-		<div data-options="region: 'east', title: '设置', split: true, border: false" style="width: 240px; padding: 10px;">
-			<form-set @addForm="addForm" @changeTableType="changeTableType" @changeTableCols="changeTableCols"></form-set>
+		<div data-options="region: 'east', title: '设置', split: true, border: false" style="width: 280px; padding: 10px;">
+			<form-set @addCollapse="addCollapse"></form-set>
 		</div>
 		<div data-options="region:'center',title:'预览',border:false" style="">
 			<div class="tab_div_body">
-                <table :class="[tableType, 'UCG_col-'+tableCols]">
-                    <tr v-for="(x, i_x) in trLength" :key="x.code">
-                        <template v-for="(y, i_y) in tdLength">
-                            <td>
-                                <span v-if="getFormDataItem(i_x, i_y, 'datatype') == '*'" class="star">*</span>
-                                {{getFormDataItem(i_x, i_y, 'label')}}
-                            </td>
-                            <td>
-                                <input v-if="getFormDataItem(i_x, i_y, 'label')"
-                                 type="text" 
-                                 :id="getFormDataItem(i_x, i_y, 'id')"
-                                 :name="getFormDataItem(i_x, i_y, 'name')"
-                                 :value="getFormDataItem(i_x, i_y, 'value')"
-                                 :datatype="getFormDataItem(i_x, i_y, 'datatype')"/>
-                            </td>
-                        </template>
-                    </tr>
-                </table>
+                <collapse v-for="(c, i_c) in collapseData" :key="c.code" :title="c.title">
+                    <table :class="[c.tableType, 'UCG_col-' + c.tableCols]">
+                        <tr v-for="(tr, i_tr) in getTrLength(i_c)" :key="tr.code">
+                            <template v-for="(td, i_td) in getTdLength(i_c)"
+                            v-if="getFormDataItem(i_c, i_tr, i_td, 'type') != 'address' && getFormDataItem(i_c, i_tr, i_td, 'type') != 'textarea'">
+                                    <td>
+                                        <span v-if="getFormDataItem(i_c, i_tr, i_td, 'datatype') == '*'" class="star">*</span>
+                                        {{getFormDataItem(i_c, i_tr, i_td, 'label')}}
+                                    </td>
+                                    <td>
+                                        <input                                     type="text" 
+                                        :id="getFormDataItem(i_c, i_tr, i_td, 'id')"
+                                        :name="getFormDataItem(i_c, i_tr, i_td, 'name')"
+                                        :value="getFormDataItem(i_c, i_tr, i_td, 'value')"
+                                        :datatype="getFormDataItem(i_c, i_tr, i_td, 'datatype')"/>
+                                    </td>
+                            </template>
+                            <template v-else-if="getFormDataItem(i_c, i_tr, i_td, 'type') == 'textarea'">
+                                <td>
+                                    <span v-if="getFormDataItem(i_c, i_tr, i_td, 'datatype') == '*'" class="star">*</span>
+                                    {{getFormDataItem(i_c, i_tr, i_td, 'label')}}
+                                </td>
+                                <td colspan="3">
+                                    <textarea
+                                    :id="getFormDataItem(i_c, i_tr, i_td, 'id')"
+                                    :name="getFormDataItem(i_c, i_tr, i_td, 'name')"
+                                    :datatype="getFormDataItem(i_c, i_tr, i_td, 'datatype')">
+                                    </textarea>
+                                </td>
+                            </template>
+                        </tr>
+                    </table>
+                </collapse>
             </div>
 		</div>
 	</div>
@@ -32,79 +47,69 @@
 
 <script>
 import formSet from './components/formSet.vue'
+import collapse from './components/collapse.vue'
 export default {
 	props : {
 	},
 	computed : {
-        trLength () {
-            var tableCols = this.tableCols * 1;
-            var trLength = [];
-            var loop;
-            if(tableCols == 4){
-                loop = Math.ceil(this.formData.length / 2);
-            } else if(tableCols == 2){
-                loop = Math.ceil(this.formData.length);
-            } else if(tableCols == 6){
-                loop = Math.ceil(this.formData.length / 3);
-            }
-            for(var i = 0 ; i < loop; i++){
-                trLength.push({code: i});
-            }
-            return trLength;
-        },
-        tdLength () {
-            var tableCols = this.tableCols * 1;
-            var tdLength = [];
-            var loop;
-            // if(this.tableType == 'UCG_formTable_v2'){
-                if(tableCols == 4){
-                    loop = 2;
-                } else if(tableCols == 2){
-                    loop = 1;
-                } else if(tableCols == 6){
-                    loop = 3;
-                }
-            // }
-            for(var i = 0 ; i < loop; i++){
-                tdLength.push({code: i});
-            }
-            return tdLength;
-        }
+        
 	},
 	components : {
-		formSet
+        formSet,
+        collapse
 	},
 	data : () => {
 		return {
-            tableType: 'UCG_formTable_v2',
-            tableCols: '2',
-            formData: []
+            collapseData: []
 		};
-	},
+    },
 	methods : {
-        addForm (options) {
-            this.formData.push(options);
-            console.log(this.formData);
+        addCollapse (options) {
+            this.collapseData.push(options);
+            console.log(this.collapseData);
         },
-        // changeForm (options, index) {
-        //     debugger;
-        //     Object.assign(this.formData[index], options);
-        // },
-        changeTableType (type) {
-            if(type)
-                this.$set(this.$data, 'tableType', type);
-        },
-        changeTableCols (cols) {
-            if(cols)
-                this.$set(this.$data, 'tableCols', cols);
-        },
-        getFormData (index) {
-            return this.formData[index] || {};
-        },
-        getFormDataItem (i_x, i_y, key) {
-            var formData = this.formData[i_x * this.tdLength.length + i_y] || {};
-            console.log(formData[key])
+        getFormDataItem (i_c, i_x, i_y, key) {
+            var collapseData = this.collapseData[i_c];
+            var formData = collapseData['formList'][i_x * this.getTdLength(i_c) + i_y] || {};
             return formData[key];
+        },
+        getTrLength (i_c) {
+            var collapseData = this.collapseData[i_c];
+            var tableCols = collapseData.tableCols * 1;
+            var formLength = collapseData.formList.length;
+            var loopArr = [];
+            var loop;
+            if(tableCols == 4){
+                loop = Math.ceil(formLength / 2);
+            } else if(tableCols == 2){
+                loop = Math.ceil(formLength);
+            } else if(tableCols == 6){
+                loop = Math.ceil(formLength / 3);
+            }
+            for(var i = 0 ; i < loop; i++){
+                loopArr.push({code: i});
+            }
+            return loopArr;
+        },
+        getTdLength (i_c) {
+            var collapseData = this.collapseData[i_c];
+            var tableCols = collapseData.tableCols * 1;
+            // var loopArr = [];
+            // var loop;
+            if(tableCols == 4){
+                // loop = 2;
+                return 2;
+            } else if(tableCols == 2){
+                // loop = 1;
+                return 1;
+            } else if(tableCols == 6){
+                // loop = 3;
+                return 3;
+            }
+            // for(var i = 0 ; i < loop; i++){
+            //     loopArr.push({code: i});
+            // }
+            // return loopArr;
         }
 	},
 	mounted  () {
